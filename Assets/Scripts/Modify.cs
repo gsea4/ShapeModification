@@ -21,7 +21,7 @@ public class Modify : MonoBehaviour
 	public bool vMode = true;
 	public bool fMode = false;
 	public bool cfMode = false;
-	List<GameObject> listOfV;
+	public List<GameObject> listOfV;
 	List<Face> listOfFaces;
 	public Vector3[] verticies;
 	int[] myTriangles;

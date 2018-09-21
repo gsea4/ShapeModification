@@ -17,9 +17,11 @@ public class Example : MonoBehaviour{
 
     private Vector3 screenPoint;
     private Vector3 offset;
+    public GameObject[] listOfV;
 
     void Start(){
         //cam = GetComponent<Camera>();
+        //listOfV = GetComponent<Modify>().listOfV;
     }
 
     void Update() {
@@ -32,6 +34,7 @@ public class Example : MonoBehaviour{
             MeshCollider meshCollider = hit.collider as MeshCollider;
             if(meshCollider == null || meshCollider.sharedMesh == null)
                 return;
+
 
             var mesh = meshCollider.sharedMesh;
             vertices1 = mesh.vertices;
@@ -47,6 +50,8 @@ public class Example : MonoBehaviour{
 
             var backwardAvailable = true;
             var forwardAvailable = true;
+
+            //Debug.Log("Normal" + hitNormal);
 
             listOfPoints.Clear();
             vertexPositions.Clear();
@@ -151,9 +156,11 @@ public class Example : MonoBehaviour{
     }
 
     void OnMouseDrag() {
+        listOfV = GameObject.FindGameObjectsWithTag("V");
+
         Vector3 cursorPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
         Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(cursorPoint) + offset;
-        Debug.Log(cursorPosition);
+        //Debug.Log(cursorPosition);
         var mesh = GetComponent<MeshFilter>().mesh;
         var anotherMesh = meshOfCollider;
         var newVertices = mesh.vertices;
@@ -162,10 +169,38 @@ public class Example : MonoBehaviour{
         var tempPositions = vertexPositions.Distinct().ToList();
 
         isSelected = true;
-        Debug.Log(normalVector);
+        // Debug.Log(normalVector);
+        // Go through all of the vertex positions and move them in the direction of the normal vector
         for(var i = 0; i < tempPositions.Count(); i++) {
             var newVector = new Vector3(normalVector.x * cursorPosition.x, normalVector.y * cursorPosition.y, normalVector.z * cursorPosition.z);
+            var anotherVector = cursorPosition - normalVector;
+            var destinationVector = new Vector3(anotherVector.x * normalVector.x, anotherVector.y * normalVector.y, anotherVector.z * normalVector.z);
+
+            // Trying to move the other vertices that share the same coordinates with the vertices on the face
+            foreach(var vertex in listOfV) {
+                if(vertex.transform.position == newVertices[tempPositions[i]]) {
+                    Debug.Log("Before: " + vertex.transform.position);
+                    var xDirection = vertex.transform.position.x + newVector.x * (-0.3f);
+                    var yDirection = vertex.transform.position.y + newVector.y * (-0.3f);
+                    var zDirection = vertex.transform.position.z + newVector.z * (-0.3f);
+                    //vertex.transform.position += newVector * (-0.3f);
+                    vertex.transform.position = new Vector3(xDirection, yDirection, zDirection);
+                    Debug.Log("After: " + vertex.transform.position);
+                    //newVertices[tempPositions[i]] += newVector * (-0.3f);
+                    //newVertices[tempPositions[i]] += newVector * (-0.3f);
+                    //vertex.transform.Translate(destinationVector);
+                }
+            }
+
+
             newVertices[tempPositions[i]] += newVector * (-0.3f);
+            // listOfV[tempPositions[i]].transform.position += newVector * (-0.3f);
+
+            // Debug.Log("Distance: " + Vector3.Distance(newVertices[tempPositions[i]], newVector));
+            if(Vector3.Distance(newVertices[tempPositions[i]], destinationVector) > 0) {
+                
+            }
+
             
             //anotherVertices[tempPositions[i]] += normalVector;
         }
